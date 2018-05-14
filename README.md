@@ -1,10 +1,13 @@
-# MultiPartSwift
+## MultiPartSwift
+
 Upload videos , images and other files(pdf, doc,..) using MultiPart class Swift 4
 
-Step 1:-  Copy & paste MultiPart.swift file into your project 
+**For Objective C** :- [multiPart](https://github.com/Datt1994/multiPart)
 
-Step 2:-  Usage 
+**Step 1**:-  Copy & paste `MultiPart.swift` file into your project 
 
+**Step 2**:-  Usage 
+```swift
         let filePath = Bundle.main.url(forResource: "test", withExtension: "jpg")?.path
         
         let dicParameetrs = ["a_id": "1", "name": "Datt"]
@@ -25,3 +28,4 @@ Step 2:-  Usage
             }
             
         }
+```
