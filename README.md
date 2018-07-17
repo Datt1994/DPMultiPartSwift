@@ -1,8 +1,8 @@
-## MultiPartSwift
+## DPMultiPartSwift
 
 Upload videos , images and other files(pdf, doc,..) using MultiPart class Swift 4
 
-**For Objective C** :- [multiPart](https://github.com/Datt1994/multiPart)
+**For Objective C** :- [DPMultiPartObjC](https://github.com/Datt1994/multiPart)
 
 **Step 1**:-  Copy & paste `MultiPart.swift` file into your project 
 
