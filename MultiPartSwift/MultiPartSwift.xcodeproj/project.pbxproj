@@ -56,13 +56,13 @@
 		C6D4D9222032EF9B0032AE09 /* MultiPartSwift */ = {
 			isa = PBXGroup;
 			children = (
+				C6D4D9352032F08B0032AE09 /* MultiPart.swift */,
 				C6D4D9232032EF9B0032AE09 /* AppDelegate.swift */,
 				C6D4D9252032EF9B0032AE09 /* ViewController.swift */,
 				C6D4D9272032EF9B0032AE09 /* Main.storyboard */,
 				C6D4D92A2032EF9B0032AE09 /* Assets.xcassets */,
 				C6D4D92C2032EF9B0032AE09 /* LaunchScreen.storyboard */,
 				C6D4D92F2032EF9B0032AE09 /* Info.plist */,
-				C6D4D9352032F08B0032AE09 /* MultiPart.swift */,
 			);
 			path = MultiPartSwift;
 			sourceTree = "<group>";

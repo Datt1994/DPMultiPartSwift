@@ -49,6 +49,63 @@ class MultiPart: NSObject {
             })
         task?.resume()
     }
+    func callPostWSWithModel<T : Decodable>(_ url_String: String, parameters: [String: Any]?, filePathArr arrFilePath: [[String:Any]]?, model : T.Type, completion: @escaping (_ success: Bool, _ object: AnyObject?)->()) {
+        
+        let boundary = generateBoundaryString()
+        
+        // configure the request
+        let request = NSMutableURLRequest(url: URL(string: url_String)!)
+        request.httpMethod = "POST"
+        
+        // set content type
+        let contentType = "multipart/form-data; boundary=\(boundary)"
+        //        request.setValue("asdkjfklaj;fl;afnsvjafds", forHTTPHeaderField: "Authorization")
+        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+        
+        // create body
+        let httpBody: Data? = createBody(withBoundary: boundary, parameters: parameters, paths: arrFilePath)
+        session = URLSession.shared
+        
+        let task = session?.uploadTask(with: request as URLRequest, from: httpBody, completionHandler: {(_ data: Data?, _ response: URLResponse?, _ error: Error?) -> Void in
+            if error != nil {
+                print("error = \(error ?? 0 as! Error)")
+                DispatchQueue.main.async(execute: {() -> Void in
+                    completion( false , error as AnyObject)
+                })
+                return
+            }
+            if let data = data {
+                let decoder = JSONDecoder()
+                do {
+                    if let convertedJsonIntoDict = try JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary {
+                        print(convertedJsonIntoDict)
+                    }
+                    
+                    let dictResponse = try decoder.decode(GenralResponseModel.self, from: data )
+                    
+                    let strStatus = dictResponse.status ?? "failure"
+                    if strStatus == "success" {
+                        let dictResponsee = try decoder.decode(model, from: data )
+                        mainThread {
+                            completion(true,dictResponsee as AnyObject)
+                        }
+                    }
+                    else{
+                        mainThread {
+                            completion(false, dictResponse.message as AnyObject)
+                            debugPrint(dictResponse.message ?? 0)
+                        }
+                    }
+                } catch let error as NSError {
+                    debugPrint(error.localizedDescription)
+                    mainThread {
+                        completion(false, error as AnyObject)
+                    }
+                }
+            }
+        })
+        task?.resume()
+    }
     func createBody(withBoundary boundary: String, parameters: [String: Any]?, paths: [[String:Any]]?) -> Data {
         var httpBody = Data()
         
@@ -100,4 +157,13 @@ class MultiPart: NSObject {
         return "application/octet-stream"
     }
     
+}
+func mainThread(_ completion: @escaping () -> ()) {
+    DispatchQueue.main.async {
+        completion()
+    }
+}
+class GenralResponseModel : Decodable {
+    var message : String?
+    var status : String?
 }

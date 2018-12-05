@@ -31,6 +31,12 @@ class ViewController: UIViewController {
             }
             
         }
+        
+        MultiPart().callPostWSWithModel("www.xyz.com/../..", parameters: dicParameetrs, filePathArr: arrFiles, model: LoginModel.self) { (success, obj) in
+            if success , let obj = obj as? LoginModel {
+                print(obj)
+            }
+        }
         // Do any additional setup after loading the view, typically from a nib.
     }
 
@@ -41,4 +47,16 @@ class ViewController: UIViewController {
 
 
 }
-
+struct LoginModel: Decodable {
+    var data : LoginData?
+    var message : String?
+    var status : String?
+}
+struct LoginData: Decodable {
+    
+    var profile_path : String?
+    var id : Int?
+    var fullname : String?
+    var email_id : String?
+    var status : Bool?
+}
