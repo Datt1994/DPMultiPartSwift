@@ -24,6 +24,7 @@ class ViewController: UIViewController {
         ]
 //        let arrFiles = [[multiPartFieldName: "file",
 //                        multiPartPathURL: [filePath]]]
+        // With JSON Object
         MultiPart().callPostWebService("www.xyz.com/../..", parameetrs: dicParameetrs, filePathArr: arrFiles) { (dic, error) in
             
             if (error == nil) {
@@ -31,7 +32,7 @@ class ViewController: UIViewController {
             }
             
         }
-        
+        // With Model Object
         MultiPart().callPostWSWithModel("www.xyz.com/../..", parameters: dicParameetrs, filePathArr: arrFiles, model: LoginModel.self) { (success, obj) in
             if success , let obj = obj as? LoginModel {
                 print(obj)
