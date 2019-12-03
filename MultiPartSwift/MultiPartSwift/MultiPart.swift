@@ -112,9 +112,17 @@ class MultiPart: NSObject {
         // add params (all params are strings)
         if let parameters = parameters {
             for (parameterKey, parameterValue) in parameters {
-                httpBody.append("--\(boundary)\r\n".data(using: String.Encoding.utf8)!)
-                httpBody.append("Content-Disposition: form-data; name=\"\(parameterKey)\"\r\n\r\n".data(using: String.Encoding.utf8)!)
-                httpBody.append("\(parameterValue)\r\n".data(using: String.Encoding.utf8)!)
+                if let arr = parameterValue as? [AnyObject]  {
+                    for i in 0 ..< arr.count {
+                        httpBody.append("--\(boundary)\r\n".data(using: String.Encoding.utf8)!)
+                        httpBody.append("Content-Disposition: form-data; name=\"\(parameterKey)[]\"\r\n\r\n".data(using: String.Encoding.utf8)!)
+                        httpBody.append("\(arr[i])\r\n".data(using: String.Encoding.utf8)!)
+                    }
+                } else {
+                    httpBody.append("--\(boundary)\r\n".data(using: String.Encoding.utf8)!)
+                    httpBody.append("Content-Disposition: form-data; name=\"\(parameterKey)\"\r\n\r\n".data(using: String.Encoding.utf8)!)
+                    httpBody.append("\(parameterValue)\r\n".data(using: String.Encoding.utf8)!)
+                }
             }
         }
         
