@@ -15,17 +15,17 @@ class ViewController: UIViewController {
         let filePath = Bundle.main.url(forResource: "test", withExtension: "jpg")?.path
         let dicParameetrs = ["a_id": "1", "b_id": "3"]
         let arrFiles = [
-            [multiPartFieldName: "images[]",/*(if only 1 file upload don't use [])*/
-             multiPartPathURLs: [filePath, filePath]],
-            [multiPartFieldName: "video",
-             multiPartPathURLs: ["/Users/xyz/.../abc.mp4"]],
-            [multiPartFieldName: "pdf[]",
-             multiPartPathURLs: ["/Users/xyz/.../xyz.pdf", "/Users/xyz/.../h.pdf"]]
+            [MultiPart.fieldName: "images[]",/*(if only 1 file upload don't use [])*/
+             MultiPart.pathURLs: [filePath, filePath]],
+            [MultiPart.fieldName: "video",
+             MultiPart.pathURLs: ["/Users/xyz/.../abc.mp4"]],
+            [MultiPart.fieldName: "pdf[]",
+             MultiPart.pathURLs: ["/Users/xyz/.../xyz.pdf", "/Users/xyz/.../h.pdf"]]
         ]
 //        let arrFiles = [[multiPartFieldName: "file",
 //                        multiPartPathURL: [filePath]]]
         // With JSON Object
-        MultiPart().callPostWebService("www.xyz.com/../..", parameetrs: dicParameetrs, filePathArr: arrFiles) { (dic, error) in
+        MultiPart().callPostWebService("http://www.xyz.com/../..", parameetrs: dicParameetrs, filePathArr: arrFiles) { (dic, error) in
             
             if (error == nil) {
                 print(error ?? "")
@@ -33,9 +33,15 @@ class ViewController: UIViewController {
             
         }
         // With Model Object
-        MultiPart().callPostWSWithModel("www.xyz.com/../..", parameters: dicParameetrs, filePathArr: arrFiles, model: LoginModel.self) { (success, obj) in
-            if success , let obj = obj as? LoginModel {
-                print(obj)
+        MultiPart().callPostWSWithModel("http://www.xyz.com/../..", parameters: dicParameetrs, filePathArr: arrFiles, model: LoginModel.self) {
+            result in
+            switch result {
+            case .success(let response):
+                print(response)
+            case .failure(let failureResponse):
+                print(failureResponse.message ?? "")
+            case .error(let e):
+                print(e ?? "")
             }
         }
         // Do any additional setup after loading the view, typically from a nib.

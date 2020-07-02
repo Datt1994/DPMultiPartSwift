@@ -8,11 +8,21 @@
 
 import UIKit
 import MobileCoreServices
-let multiPartFieldName = "fieldName"
-let multiPartPathURLs = "pathURL"
-class MultiPart: NSObject {
+
+
+public enum MultiPartResult<Value,ResponseError : GeneralResponseModel> {
+    case success(Value)
+    case failure(ResponseError)
+    case error(Error?)
+}
+
+public class MultiPart: NSObject {
+    
+    public static let fieldName = "fieldName"
+    public static let pathURLs = "pathURL"
+    
     var session: URLSession?
-    func callPostWebService(_ url_String: String, parameetrs: [String: Any]?, filePathArr arrFilePath: [[String:Any]]?, completion: @escaping ([String: Any]?, Error?)->()) {
+    public func callPostWebService(_ url_String: String, parameetrs: [String: Any]?, filePathArr arrFilePath: [[String:Any]]?, completion: @escaping ([String: Any]?, Error?)->()) {
         
         let boundary = generateBoundaryString()
         
@@ -49,7 +59,7 @@ class MultiPart: NSObject {
             })
         task?.resume()
     }
-    func callPostWSWithModel<T : Decodable>(_ url_String: String, parameters: [String: Any]?, filePathArr arrFilePath: [[String:Any]]?, model : T.Type, completion: @escaping (_ success: Bool, _ object: AnyObject?)->()) {
+    public func callPostWSWithModel<T : Decodable>(_ url_String: String, parameters: [String: Any]?, filePathArr arrFilePath: [[String:Any]]?, model : T.Type, completion: @escaping (MultiPartResult<T, GeneralResponseModel>)->()) {
         
         let boundary = generateBoundaryString()
         
@@ -70,7 +80,7 @@ class MultiPart: NSObject {
             if error != nil {
                 print("error = \(error ?? 0 as! Error)")
                 DispatchQueue.main.async(execute: {() -> Void in
-                    completion( false , error as AnyObject)
+                    completion(.error(error))
                 })
                 return
             }
@@ -81,32 +91,32 @@ class MultiPart: NSObject {
                         print(convertedJsonIntoDict)
                     }
                     
-                    let dictResponse = try decoder.decode(GenralResponseModel.self, from: data )
+                    let dictResponse = try decoder.decode(GeneralResponseModel.self, from: data )
                     
-                    let strStatus = dictResponse.status ?? "failure"
-                    if strStatus == "success" {
+                    let strStatus = dictResponse.status ?? 0
+                    if strStatus == 200 {
                         let dictResponsee = try decoder.decode(model, from: data )
                         mainThread {
-                            completion(true,dictResponsee as AnyObject)
+                            completion(.success(dictResponsee))
                         }
                     }
                     else{
                         mainThread {
-                            completion(false, dictResponse.message as AnyObject)
+                            completion(.failure(dictResponse))
                             debugPrint(dictResponse.message ?? 0)
                         }
                     }
                 } catch let error as NSError {
                     debugPrint(error.localizedDescription)
                     mainThread {
-                        completion(false, error as AnyObject)
+                        completion(.error(error))
                     }
                 }
             }
         })
         task?.resume()
     }
-    func createBody(withBoundary boundary: String, parameters: [String: Any]?, paths: [[String:Any]]?) -> Data {
+    fileprivate func createBody(withBoundary boundary: String, parameters: [String: Any]?, paths: [[String:Any]]?) -> Data {
         var httpBody = Data()
         
         // add params (all params are strings)
@@ -129,14 +139,14 @@ class MultiPart: NSObject {
         // add File data
         if let paths = paths {
             for pathDic in paths {
-                for path: String in pathDic[multiPartPathURLs] as! [String] {
+                for path: String in pathDic[MultiPart.pathURLs] as! [String] {
                     let filename: String = URL(fileURLWithPath: path).lastPathComponent
                     do {
                         let data = try Data(contentsOf: URL(fileURLWithPath: path))
                         
                         let mimetype: String = mimeType(forPath: path)
                         httpBody.append("--\(boundary)\r\n".data(using: String.Encoding.utf8)!)
-                        httpBody.append("Content-Disposition: form-data; name=\"\(pathDic[multiPartFieldName] ?? "")\"; filename=\"\(filename)\"\r\n".data(using: String.Encoding.utf8)!)
+                        httpBody.append("Content-Disposition: form-data; name=\"\(pathDic[MultiPart.fieldName] ?? "")\"; filename=\"\(filename)\"\r\n".data(using: String.Encoding.utf8)!)
                         httpBody.append("Content-Type: \(mimetype)\r\n\r\n".data(using: String.Encoding.utf8)!)
                         httpBody.append(data)
                         httpBody.append("\r\n".data(using: String.Encoding.utf8)!)
@@ -149,10 +159,10 @@ class MultiPart: NSObject {
         httpBody.append("--\(boundary)--\r\n".data(using: String.Encoding.utf8)!)
         return httpBody
     }
-    func generateBoundaryString() -> String {
+    fileprivate func generateBoundaryString() -> String {
         return "Boundary-\(UUID().uuidString)"
     }
-    func mimeType(forPath path: String) -> String {
+    fileprivate func mimeType(forPath path: String) -> String {
         // get a mime type for an extension using MobileCoreServices.framework
         let url = NSURL(fileURLWithPath: path)
         let pathExtension = url.pathExtension
@@ -166,12 +176,12 @@ class MultiPart: NSObject {
     }
     
 }
-func mainThread(_ completion: @escaping () -> ()) {
+fileprivate func mainThread(_ completion: @escaping () -> ()) {
     DispatchQueue.main.async {
         completion()
     }
 }
-class GenralResponseModel : Decodable {
+public class GeneralResponseModel : Decodable {
     var message : String?
-    var status : String?
+    var status : Int?
 }
